@@ -8,6 +8,7 @@ import(
   "path/filepath"
 )
 
+// Struct used for rendering of mustache templates.
 type Atomustache struct {
   root string
   ext string
@@ -16,6 +17,8 @@ type Atomustache struct {
   layouts map[string]*Template
 }
 
+// Create a new struct.
+// root - location of templates directory
 func New(root string) *Atomustache {
   r := Atomustache{
     root: root,
@@ -30,16 +33,21 @@ func New(root string) *Atomustache {
   return &r
 }
 
-func checkErr(err error) {
-  if err != nil {
-    fmt.Println("error")
-    log.Fatal(err)
-  }
+// Rendering
+// ----------------------------------------------------
+
+func (r *Atomustache) RenderView(view string, data ...interface{}) string {
+  out := r.views[view].Render(data...)
+  return out
 }
 
-func noExt(filename string) string {
-  return filename[0:len(filename)-len(filepath.Ext(filename))]
+func (r *Atomustache) RenderViewInLayout(view string, layout string, data ...interface{}) string {
+  out := r.views[view].RenderInLayout(r.layouts[layout], data...)
+  return out
 }
+
+// Load files into maps
+// ----------------------------------------------------
 
 func (r *Atomustache) loadLayouts() {
   layouts_root := r.root + "/layouts"
@@ -100,12 +108,16 @@ func (r *Atomustache) loadViews() {
   
 }
 
-func (r *Atomustache) RenderView(view string, data ...interface{}) string {
-  out := r.views[view].Render(data...)
-  return out
+// Helpers
+// ----------------------------------------------------
+
+func checkErr(err error) {
+  if err != nil {
+    fmt.Println("error")
+    log.Fatal(err)
+  }
 }
 
-func (r *Atomustache) RenderViewInLayout(view string, layout string, data ...interface{}) string {
-  out := r.views[view].RenderInLayout(r.layouts[layout], data...)
-  return out
+func noExt(filename string) string {
+  return filename[0:len(filename)-len(filepath.Ext(filename))]
 }
