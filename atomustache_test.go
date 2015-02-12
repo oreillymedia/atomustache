@@ -1,11 +1,16 @@
 package atomustache_test
 
 import (
-	"github.com/oreillymedia/atomustache"
-
+  "github.com/oreillymedia/atomustache"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"testing"
 )
+
+func TestAtomustache(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Atomustache Suite")
+}
 
 var _ = Describe("Atomustache", func() {
 
