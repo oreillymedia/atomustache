@@ -4,6 +4,7 @@ import(
   "io/ioutil"
   "strings"
   "log"
+  "os"
   "fmt"
   "path/filepath"
 )
@@ -49,14 +50,25 @@ func (r *Atomustache) RenderViewInLayout(view string, layout string, data ...int
 // Load files into maps
 // ----------------------------------------------------
 
+func (r *Atomustache) readRelDir(path string) []os.FileInfo {
+  items, err := ioutil.ReadDir(r.root + "/" + path)
+  checkErr(err)
+  return items
+}
+
+func (r *Atomustache) readRelFile(path string) string {
+  buf, err := ioutil.ReadFile(r.root + "/" + path)
+  checkErr(err)
+  return string(buf)
+}
+
 func (r *Atomustache) loadLayouts() {
-  layouts_root := r.root + "/layouts"
-  files, _ := ioutil.ReadDir(layouts_root)
+  files := r.readRelDir("layouts")
   for _,file := range files {
     if strings.HasSuffix(file.Name(), r.ext) {
       k := noExt(file.Name())
-      v, _ := ioutil.ReadFile(layouts_root + "/" + file.Name())
-      t, mErr := ParseString(string(v), nil)
+      v := r.readRelFile("layouts/" + file.Name())
+      t, mErr := ParseString(v, nil)
       checkErr(mErr)
       r.layouts[k] = t
     }
@@ -64,21 +76,20 @@ func (r *Atomustache) loadLayouts() {
 }
 
 func (r *Atomustache) loadAtomic() {
-  atomic_root := r.root + "/atomic"
-  folders, _ := ioutil.ReadDir(atomic_root)
+  folders := r.readRelDir("atomic")
   for _,folder := range folders {
-    r.folderToAtomic(atomic_root + "/" + folder.Name(), folder.Name())
+    r.folderToAtomic("atomic/" + folder.Name(), folder.Name())
   }
 }
 
 func (r *Atomustache) folderToAtomic(folder string, atomicType string) {
-  items, _ := ioutil.ReadDir(folder)
+  items := r.readRelDir(folder)
   for _,item := range items {
     if item.IsDir() {
       r.folderToAtomic(folder + "/" + item.Name(), atomicType)
     } else if strings.HasSuffix(item.Name(), r.ext) {
       k := atomicType + "-" + noExt(item.Name())
-      v, _ := ioutil.ReadFile(folder + "/" + item.Name())
+      v := r.readRelFile(folder + "/" + item.Name())
       t, mErr := ParseString(string(v), r.atomic)
       checkErr(mErr)
       r.atomic[k] = t
@@ -87,17 +98,14 @@ func (r *Atomustache) folderToAtomic(folder string, atomicType string) {
 }
 
 func (r *Atomustache) loadViews() {
-
-  views_root := r.root + "/views"
-
-  folders, _ := ioutil.ReadDir(views_root)
+  folders := r.readRelDir("views")
   for _,folder := range folders {
     if folder.IsDir() {
-      files, _ := ioutil.ReadDir(views_root + "/" + folder.Name())
+      files := r.readRelDir("views/" + folder.Name())
       for _,file := range files {
         if strings.HasSuffix(file.Name(), r.ext) {
           k := folder.Name() + "/" + noExt(file.Name())
-          v, _ := ioutil.ReadFile(views_root + "/" + folder.Name() + "/" + file.Name())
+          v := r.readRelFile("views/" + folder.Name() + "/" + file.Name())
           t, mErr := ParseString(string(v), r.atomic)
           checkErr(mErr)
           r.views[k] = t
