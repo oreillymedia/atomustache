@@ -13,6 +13,7 @@ type Atomustache struct {
   ext string
   views map[string]*Template
   atomic map[string]*Template
+  layouts map[string]*Template
 }
 
 func New(root string) *Atomustache {
@@ -21,7 +22,9 @@ func New(root string) *Atomustache {
     ext: ".html",
     views: make(map[string]*Template),
     atomic: make(map[string]*Template),
+    layouts: make(map[string]*Template),
   }
+  r.loadLayouts()
   r.loadAtomic()
   r.loadViews()
   return &r
@@ -36,6 +39,20 @@ func checkErr(err error) {
 
 func noExt(filename string) string {
   return filename[0:len(filename)-len(filepath.Ext(filename))]
+}
+
+func (r *Atomustache) loadLayouts() {
+  layouts_root := r.root + "/layouts"
+  files, _ := ioutil.ReadDir(layouts_root)
+  for _,file := range files {
+    if strings.HasSuffix(file.Name(), r.ext) {
+      k := noExt(file.Name())
+      v, _ := ioutil.ReadFile(layouts_root + "/" + file.Name())
+      t, mErr := ParseString(string(v), nil)
+      checkErr(mErr)
+      r.layouts[k] = t
+    }
+  }
 }
 
 func (r *Atomustache) loadAtomic() {
@@ -61,7 +78,6 @@ func (r *Atomustache) folderToAtomic(folder string, atomicType string) {
   }
 }
 
-
 func (r *Atomustache) loadViews() {
 
   views_root := r.root + "/views"
@@ -86,5 +102,10 @@ func (r *Atomustache) loadViews() {
 
 func (r *Atomustache) RenderView(view string, data ...interface{}) string {
   out := r.views[view].Render(data...)
+  return out
+}
+
+func (r *Atomustache) RenderViewInLayout(view string, layout string, data ...interface{}) string {
+  out := r.views[view].RenderInLayout(r.layouts[layout], data...)
   return out
 }
