@@ -23,7 +23,7 @@ type Atomustache struct {
 func New(root string) *Atomustache {
   r := Atomustache{
     Root: root,
-    Ext: ".html",
+    Ext: ".mustache",
     Views: make(map[string]*Template),
     Atomic: make(map[string]*Template),
     Layouts: make(map[string]*Template),
