@@ -11,22 +11,22 @@ import(
 
 // Struct used for rendering of mustache templates.
 type Atomustache struct {
-  root string
-  ext string
-  views map[string]*Template
-  atomic map[string]*Template
-  layouts map[string]*Template
+  Root string
+  Ext string
+  Views map[string]*Template
+  Atomic map[string]*Template
+  Layouts map[string]*Template
 }
 
 // Create a new struct.
 // root - location of templates directory
 func New(root string) *Atomustache {
   r := Atomustache{
-    root: root,
-    ext: ".html",
-    views: make(map[string]*Template),
-    atomic: make(map[string]*Template),
-    layouts: make(map[string]*Template),
+    Root: root,
+    Ext: ".html",
+    Views: make(map[string]*Template),
+    Atomic: make(map[string]*Template),
+    Layouts: make(map[string]*Template),
   }
   r.loadLayouts()
   r.loadAtomic()
@@ -38,12 +38,12 @@ func New(root string) *Atomustache {
 // ----------------------------------------------------
 
 func (r *Atomustache) RenderView(view string, data ...interface{}) string {
-  out := r.views[view].Render(data...)
+  out := r.Views[view].Render(data...)
   return out
 }
 
 func (r *Atomustache) RenderViewInLayout(view string, layout string, data ...interface{}) string {
-  out := r.views[view].RenderInLayout(r.layouts[layout], data...)
+  out := r.Views[view].RenderInLayout(r.Layouts[layout], data...)
   return out
 }
 
@@ -51,13 +51,13 @@ func (r *Atomustache) RenderViewInLayout(view string, layout string, data ...int
 // ----------------------------------------------------
 
 func (r *Atomustache) readRelDir(path string) []os.FileInfo {
-  items, err := ioutil.ReadDir(r.root + "/" + path)
+  items, err := ioutil.ReadDir(r.Root + "/" + path)
   checkErr(err)
   return items
 }
 
 func (r *Atomustache) readRelFile(path string) string {
-  buf, err := ioutil.ReadFile(r.root + "/" + path)
+  buf, err := ioutil.ReadFile(r.Root + "/" + path)
   checkErr(err)
   return string(buf)
 }
@@ -65,12 +65,12 @@ func (r *Atomustache) readRelFile(path string) string {
 func (r *Atomustache) loadLayouts() {
   files := r.readRelDir("layouts")
   for _,file := range files {
-    if strings.HasSuffix(file.Name(), r.ext) {
+    if strings.HasSuffix(file.Name(), r.Ext) {
       k := noExt(file.Name())
       v := r.readRelFile("layouts/" + file.Name())
       t, mErr := ParseString(v, nil)
       checkErr(mErr)
-      r.layouts[k] = t
+      r.Layouts[k] = t
     }
   }
 }
@@ -87,12 +87,12 @@ func (r *Atomustache) folderToAtomic(folder string, atomicType string) {
   for _,item := range items {
     if item.IsDir() {
       r.folderToAtomic(folder + "/" + item.Name(), atomicType)
-    } else if strings.HasSuffix(item.Name(), r.ext) {
+    } else if strings.HasSuffix(item.Name(), r.Ext) {
       k := atomicType + "-" + noExt(item.Name())
       v := r.readRelFile(folder + "/" + item.Name())
-      t, mErr := ParseString(string(v), r.atomic)
+      t, mErr := ParseString(string(v), r.Atomic)
       checkErr(mErr)
-      r.atomic[k] = t
+      r.Atomic[k] = t
     } 
   }
 }
@@ -103,12 +103,12 @@ func (r *Atomustache) loadViews() {
     if folder.IsDir() {
       files := r.readRelDir("views/" + folder.Name())
       for _,file := range files {
-        if strings.HasSuffix(file.Name(), r.ext) {
+        if strings.HasSuffix(file.Name(), r.Ext) {
           k := folder.Name() + "/" + noExt(file.Name())
           v := r.readRelFile("views/" + folder.Name() + "/" + file.Name())
-          t, mErr := ParseString(string(v), r.atomic)
+          t, mErr := ParseString(string(v), r.Atomic)
           checkErr(mErr)
-          r.views[k] = t
+          r.Views[k] = t
         }
       }
     }
