@@ -7,6 +7,7 @@ import(
   "os"
   "fmt"
   "path/filepath"
+  "errors"
 )
 
 // Struct used for rendering of mustache templates.
@@ -20,10 +21,10 @@ type Atomustache struct {
 
 // Create a new struct.
 // root - location of templates directory
-func New(root string) *Atomustache {
+func New(root string, ext string) *Atomustache {
   r := Atomustache{
     Root: root,
-    Ext: ".mustache",
+    Ext: ext,
     Views: make(map[string]*Template),
     
     // the atomic templates are saved as strings
@@ -41,14 +42,20 @@ func New(root string) *Atomustache {
 // Rendering
 // ----------------------------------------------------
 
-func (r *Atomustache) RenderView(view string, data ...interface{}) string {
+func (r *Atomustache) RenderView(view string, data ...interface{}) (string, error) {
+  if r.Views[view] == nil {
+    return "", errors.New("no such view: " + view)
+  }
   out := r.Views[view].Render(data...)
-  return out
+  return out, nil
 }
 
-func (r *Atomustache) RenderViewInLayout(view string, layout string, data ...interface{}) string {
+func (r *Atomustache) RenderViewInLayout(view string, layout string, data ...interface{}) (string, error) {
+  if r.Views[view] == nil {
+    return "", errors.New("no such view: " + view)
+  }
   out := r.Views[view].RenderInLayout(r.Layouts[layout], data...)
-  return out
+  return out, nil
 }
 
 // Load files into maps

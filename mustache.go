@@ -103,7 +103,7 @@ func (tmpl *Template) readString(s string) (string, error) {
 }
 
 func (tmpl *Template) parsePartial(name string) (*Template, error) {
-    
+
     // first look in template partial map. Added by Rune
     if tmpl.partials != nil && tmpl.partials[name] != "" {
         return ParseString(tmpl.partials[name], tmpl.partials)
