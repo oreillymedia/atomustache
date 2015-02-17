@@ -42,7 +42,7 @@ type Template struct {
     curline int
     dir     string
     elems   []interface{}
-    partials map[string]*Template // Added by Rune
+    partials map[string]string // Added by Rune
 }
 
 type parseError struct {
@@ -105,8 +105,8 @@ func (tmpl *Template) readString(s string) (string, error) {
 func (tmpl *Template) parsePartial(name string) (*Template, error) {
     
     // first look in template partial map. Added by Rune
-    if tmpl.partials != nil && tmpl.partials[name] != nil {
-        return tmpl.partials[name], nil
+    if tmpl.partials != nil && tmpl.partials[name] != "" {
+        return ParseString(tmpl.partials[name], tmpl.partials)
     }
 
     filenames := []string{
@@ -539,7 +539,7 @@ func (tmpl *Template) RenderInLayout(layout *Template, context ...interface{}) s
     return layout.Render(allContext...)
 }
 
-func ParseString(data string, partials map[string]*Template) (*Template, error) {
+func ParseString(data string, partials map[string]string) (*Template, error) {
     cwd := os.Getenv("CWD")
     tmpl := Template{data, "{{", "}}", 0, 1, cwd, []interface{}{}, partials}
     err := tmpl.parse()

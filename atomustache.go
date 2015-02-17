@@ -14,7 +14,7 @@ type Atomustache struct {
   Root string
   Ext string
   Views map[string]*Template
-  Atomic map[string]*Template
+  Atomic map[string]string
   Layouts map[string]*Template
 }
 
@@ -25,7 +25,11 @@ func New(root string) *Atomustache {
     Root: root,
     Ext: ".mustache",
     Views: make(map[string]*Template),
-    Atomic: make(map[string]*Template),
+    
+    // the atomic templates are saved as strings
+    // because we need all of the partials before
+    // parsing into template to avoid "partial not found"
+    Atomic: make(map[string]string),
     Layouts: make(map[string]*Template),
   }
   r.loadLayouts()
@@ -90,9 +94,7 @@ func (r *Atomustache) folderToAtomic(folder string, atomicType string) {
     } else if strings.HasSuffix(item.Name(), r.Ext) {
       k := atomicType + "-" + noExt(item.Name())
       v := r.readRelFile(folder + "/" + item.Name())
-      t, mErr := ParseString(string(v), r.Atomic)
-      checkErr(mErr)
-      r.Atomic[k] = t
+      r.Atomic[k] = v
     } 
   }
 }

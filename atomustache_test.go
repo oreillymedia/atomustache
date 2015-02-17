@@ -14,16 +14,30 @@ func TestAtomustache(t *testing.T) {
 
 var _ = Describe("Atomustache", func() {
 
-  It("#RenderView", func() {
-    renderer := atomustache.New("test_templates")
-    result := renderer.RenderView("topics/show", map[string]string{"name":"Rune"})
-    Expect(result).To(Equal("This is show Rune: This is organism Rune: This is molecules Rune. "))
+  Describe("#RenderView", func() {
+  
+    It("should render atomic templates into view", func() {
+      renderer := atomustache.New("test_templates")
+      result := renderer.RenderView("folder/oneview", map[string]string{"name":"Rune"})
+      Expect(result).To(Equal("This is show Rune: This is organism Rune: This is molecules Rune. "))
+    })
+
+    It("should render partials no matter their order", func() {
+      renderer := atomustache.New("test_templates")
+      result := renderer.RenderView("folder/anotherview", map[string]string{"name":"Rune"})
+      Expect(result).To(Equal("This is show Rune: This is molecules with: This is molecules Rune."))
+    })
+
   })
 
-  It("#RenderViewInLayout", func() {
-    renderer := atomustache.New("test_templates")
-    result := renderer.RenderViewInLayout("topics/show", "test", map[string]string{"name":"Rune"})
-    Expect(result).To(Equal("Before This is show Rune: This is organism Rune: This is molecules Rune.  After"))
+  Describe("#RenderViewInLayout", func() {
+
+    It("should render view in layout with atomic templates", func() {
+      renderer := atomustache.New("test_templates")
+      result := renderer.RenderViewInLayout("folder/oneview", "test", map[string]string{"name":"Rune"})
+      Expect(result).To(Equal("Before This is show Rune: This is organism Rune: This is molecules Rune.  After"))
+    })
+
   })
 
 })
