@@ -1,6 +1,8 @@
 # Atomic Mustache
 
-A tiny, very opinionated package to render mustache templates based on the atomic design pattern. It expects your template folder structure to be the following:
+A tiny, very opinionated package to render mustache templates based on the atomic design pattern. It makes it possible to use your mustache templates live in production, without duplicating your templates all over your apps.
+
+It expects your template folder structure to be the following:
 
     /layouts      - Rails-style layouts for the application
     /styleguide   - The atomic design folder structure (atoms, molecules, organisms, etc)
