@@ -15,7 +15,7 @@ type Atomustache struct {
   Root string
   Ext string
   Views map[string]*Template
-  Atomic map[string]string
+  Styleguide map[string]string
   Layouts map[string]*Template
 }
 
@@ -30,11 +30,11 @@ func New(root string, ext string) *Atomustache {
     // the atomic templates are saved as strings
     // because we need all of the partials before
     // parsing into template to avoid "partial not found"
-    Atomic: make(map[string]string),
+    Styleguide: make(map[string]string),
     Layouts: make(map[string]*Template),
   }
   r.loadLayouts()
-  r.loadAtomic()
+  r.loadStyleguide()
   r.loadViews()
   return &r
 }
@@ -86,10 +86,10 @@ func (r *Atomustache) loadLayouts() {
   }
 }
 
-func (r *Atomustache) loadAtomic() {
-  folders := r.readRelDir("atomic")
+func (r *Atomustache) loadStyleguide() {
+  folders := r.readRelDir("styleguide")
   for _,folder := range folders {
-    r.folderToAtomic("atomic/" + folder.Name(), folder.Name())
+    r.folderToAtomic("styleguide/" + folder.Name(), folder.Name())
   }
 }
 
@@ -101,7 +101,7 @@ func (r *Atomustache) folderToAtomic(folder string, atomicType string) {
     } else if strings.HasSuffix(item.Name(), r.Ext) {
       k := atomicType + "-" + noExt(item.Name())
       v := r.readRelFile(folder + "/" + item.Name())
-      r.Atomic[k] = v
+      r.Styleguide[k] = v
     } 
   }
 }
@@ -115,7 +115,7 @@ func (r *Atomustache) loadViews() {
         if strings.HasSuffix(file.Name(), r.Ext) {
           k := folder.Name() + "/" + noExt(file.Name())
           v := r.readRelFile("views/" + folder.Name() + "/" + file.Name())
-          t, mErr := ParseString(string(v), r.Atomic)
+          t, mErr := ParseString(string(v), r.Styleguide)
           checkErr(mErr)
           r.Views[k] = t
         }
