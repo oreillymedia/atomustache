@@ -1,0 +1,1 @@
+console.log("Atomustache shouldn't choke on this.")

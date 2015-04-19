@@ -134,7 +134,7 @@ func (r *Atomustache) loadViews() {
 
 func checkErr(err error) {
 	if err != nil {
-		fmt.Println("error")
+		fmt.Println("Atomustache error:")
 		log.Fatal(err)
 	}
 }
