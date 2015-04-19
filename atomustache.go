@@ -107,15 +107,17 @@ func (r *Atomustache) loadLayouts() error {
 
 func (r *Atomustache) loadStyleguide() error {
 
-	folders, err := ioutil.ReadDir(r.StyleguideFolder)
+	items, err := ioutil.ReadDir(r.StyleguideFolder)
 	if err != nil {
 		return errors.New("Error reading styleguide folder: " + err.Error())
 	}
 
-	for _, folder := range folders {
-		atomErr := r.folderToAtomic(r.StyleguideFolder+"/"+folder.Name(), folder.Name())
-		if atomErr != nil {
-			return atomErr
+	for _, item := range items {
+		if item.IsDir() {
+			atomErr := r.folderToAtomic(r.StyleguideFolder+"/"+item.Name(), item.Name())
+			if atomErr != nil {
+				return atomErr
+			}
 		}
 	}
 
