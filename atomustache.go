@@ -2,10 +2,7 @@ package atomustache
 
 import (
 	"errors"
-	"fmt"
 	"io/ioutil"
-	"log"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -78,18 +75,6 @@ func (r *Atomustache) RenderViewInLayout(view string, layout string, data ...int
 // Load files into maps
 // ----------------------------------------------------
 
-func (r *Atomustache) readDir(path string) []os.FileInfo {
-	items, err := ioutil.ReadDir(path)
-	checkErr(err)
-	return items
-}
-
-func (r *Atomustache) readFile(path string) string {
-	buf, err := ioutil.ReadFile(path)
-	checkErr(err)
-	return string(buf)
-}
-
 func (r *Atomustache) loadLayouts() error {
 
 	files, err := ioutil.ReadDir(r.LayoutsFolder)
@@ -99,10 +84,20 @@ func (r *Atomustache) loadLayouts() error {
 
 	for _, file := range files {
 		if strings.HasSuffix(file.Name(), r.Ext) {
+
 			k := noExt(file.Name())
-			v := r.readFile(r.LayoutsFolder + "/" + file.Name())
-			t, mErr := ParseString(v, nil)
-			checkErr(mErr)
+			path := r.LayoutsFolder + "/" + file.Name()
+
+			v, fErr := ioutil.ReadFile(path)
+			if fErr != nil {
+				return errors.New("Error reading file (" + path + "): " + fErr.Error())
+			}
+
+			t, mErr := ParseString(string(v), nil)
+			if mErr != nil {
+				return errors.New("Error parsing string for file (" + path + "): " + mErr.Error())
+			}
+
 			r.Layouts[k] = t
 		}
 	}
@@ -143,10 +138,20 @@ func (r *Atomustache) loadViews() error {
 
 			for _, file := range files {
 				if strings.HasSuffix(file.Name(), r.Ext) {
+
 					k := folder.Name() + "/" + noExt(file.Name())
-					v := r.readFile(r.ViewsFolder + "/" + folder.Name() + "/" + file.Name())
+					path := r.ViewsFolder + "/" + folder.Name() + "/" + file.Name()
+
+					v, fErr := ioutil.ReadFile(path)
+					if fErr != nil {
+						return errors.New("Error reading view file (" + path + "): " + fErr.Error())
+					}
+
 					t, mErr := ParseString(string(v), r.Styleguide)
-					checkErr(mErr)
+					if mErr != nil {
+						return errors.New("Error parsing string from file (" + path + "): " + mErr.Error())
+					}
+
 					r.Views[k] = t
 				}
 			}
@@ -171,19 +176,16 @@ func (r *Atomustache) folderToAtomic(folder string, atomicType string) error {
 			r.folderToAtomic(folder+"/"+item.Name(), atomicType)
 		} else if strings.HasSuffix(item.Name(), r.Ext) {
 			k := atomicType + "-" + noExt(item.Name())
-			v := r.readFile(folder + "/" + item.Name())
-			r.Styleguide[k] = v
+			path := folder + "/" + item.Name()
+			v, fErr := ioutil.ReadFile(path)
+			if fErr != nil {
+				errors.New("Error reading atomic file (" + path + "): " + fErr.Error())
+			}
+			r.Styleguide[k] = string(v)
 		}
 	}
 
 	return nil
-}
-
-func checkErr(err error) {
-	if err != nil {
-		fmt.Println("Atomustache error:")
-		log.Fatal(err)
-	}
 }
 
 func noExt(filename string) string {
