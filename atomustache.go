@@ -113,7 +113,10 @@ func (r *Atomustache) loadStyleguide() error {
 	}
 
 	for _, folder := range folders {
-		r.folderToAtomic(r.StyleguideFolder+"/"+folder.Name(), folder.Name())
+		atomErr := r.folderToAtomic(r.StyleguideFolder+"/"+folder.Name(), folder.Name())
+		if atomErr != nil {
+			return atomErr
+		}
 	}
 
 	return nil
@@ -173,7 +176,10 @@ func (r *Atomustache) folderToAtomic(folder string, atomicType string) error {
 
 	for _, item := range items {
 		if item.IsDir() {
-			r.folderToAtomic(folder+"/"+item.Name(), atomicType)
+			atomErr := r.folderToAtomic(folder+"/"+item.Name(), atomicType)
+			if atomErr != nil {
+				return atomErr
+			}
 		} else if strings.HasSuffix(item.Name(), r.Ext) {
 			k := atomicType + "-" + noExt(item.Name())
 			path := folder + "/" + item.Name()
