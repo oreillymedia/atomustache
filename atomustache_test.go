@@ -18,7 +18,7 @@ var _ = Describe("Atomustache", func() {
 	Describe("#RenderView", func() {
 
 		It("should render atomic templates into view", func() {
-			renderer := atomustache.New(
+			renderer, _ := atomustache.New(
 				"./test_templates/styleguide",
 				"./test_templates/layouts",
 				"./test_templates/views",
@@ -30,7 +30,7 @@ var _ = Describe("Atomustache", func() {
 		})
 
 		It("should render partials no matter their order", func() {
-			renderer := atomustache.New(
+			renderer, _ := atomustache.New(
 				"./test_templates/styleguide",
 				"./test_templates/layouts",
 				"./test_templates/views",
@@ -46,7 +46,7 @@ var _ = Describe("Atomustache", func() {
 	Describe("#RenderViewInLayout", func() {
 
 		It("should render view in layout with atomic templates", func() {
-			renderer := atomustache.New(
+			renderer, _ := atomustache.New(
 				"./test_templates/styleguide",
 				"./test_templates/layouts",
 				"./test_templates/views",
